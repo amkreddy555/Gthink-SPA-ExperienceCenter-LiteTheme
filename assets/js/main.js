@@ -2,13 +2,52 @@ window.onload = () => { setTimeout(() => { document.querySelector('.preloader').
 function toggleMenu() { document.querySelector('.nav-links').classList.toggle('active'); }
 function closeMenu() { document.querySelector('.nav-links').classList.remove('active'); }
 
+const heroContent = [
+    {
+        badge: "Next Gen Automation",
+        title: "Smart Living.<br><span>Redefined.</span>",
+        text: "Experience the seamless integration of eco-friendly luxury and digital technology with G Think."
+    },
+    {
+        badge: "G Smart App",
+        title: "Total Control.<br><span>Everywhere.</span>",
+        text: "Monitor and manage your entire home security and devices from the palm of your hand."
+    },
+    {
+        badge: "Smart Comfort",
+        title: "Wake Up<br><span>Refresh.</span>",
+        text: "Automated mood lighting and climate control for the perfect lifestyle routine."
+    }
+];
+
 let currentSlide = 0;
 const slides = document.querySelectorAll('.hero-slide');
+
+// DOM Elements to Update
+const heroBadge = document.querySelector('.hero-badge');
+const heroTitle = document.querySelector('.hero-content h1');
+const heroDesc = document.querySelector('.hero-content p');
+
 setInterval(() => {
+    // 1. Remove Active
     slides[currentSlide].classList.remove('active');
+
+    // 2. Increment
     currentSlide = (currentSlide + 1) % slides.length;
+
+    // 3. Add Active
     slides[currentSlide].classList.add('active');
-}, 3500);
+
+    // 4. Update Text Content with Fade Effect
+    const content = heroContent[currentSlide]; // Assuming 4 slides match 4 content objects
+
+    // Simple Text Swap (You could add opacity transition here if desired)
+    if (content) {
+        heroBadge.textContent = content.badge;
+        heroTitle.innerHTML = content.title;
+        heroDesc.textContent = content.text;
+    }
+}, 5000); // Increased to 5s for readability
 
 function toggleFaq(element) { element.classList.toggle('active'); }
 
@@ -99,12 +138,22 @@ window.addEventListener('load', () => {
                 entry.target.classList.add('active');
                 if (entry.target.classList.contains('stats-wrapper')) {
                     document.querySelectorAll('.counter').forEach(c => {
-                        const t = +c.getAttribute('data-target');
-                        const inc = t / 50;
+                        const target = +c.getAttribute('data-target');
+                        const suffix = c.getAttribute('data-suffix') || '+'; // Default to + if no suffix
+                        const duration = 2700; // Slowed down to 2.7 seconds as requested
+                        const increment = target / (duration / 30); // Calculate increment based on 30ms update interval
+                        let currentVal = 0; // Start from 0
+
                         const update = () => {
-                            const val = +c.innerText;
-                            if (val < t) { c.innerText = Math.ceil(val + inc); setTimeout(update, 30); }
-                            else { c.innerText = t + "+"; }
+                            if (currentVal < target) {
+                                currentVal = Math.min(target, currentVal + increment); // Ensure it doesn't exceed target
+                                // Append suffix during animation too if desired, or just number. 
+                                // Usually just number during count-up looks cleaner.
+                                c.innerText = Math.ceil(currentVal) + suffix;
+                                setTimeout(update, 30);
+                            } else {
+                                c.innerText = target + suffix;
+                            }
                         };
                         update();
                     });
