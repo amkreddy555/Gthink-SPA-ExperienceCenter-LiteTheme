@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gthink Inventors | Experience Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CSS RESET & CORE VARIABLES --- */
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --bg-body: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        body {
+            background: var(--bg-body);
+            color: var(--text-dark);
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
+        }
+
+        /* === NEW GLASS HEADER === */
+        .glass-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            /* Context for absolute nav-back */
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+
+            /* Glassmorphism */
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 24px 24px;
+            /* Soft bottom corners */
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 2.2rem;
+            text-align: center;
+
+            /* Gradient Highlight */
+            background: linear-gradient(135deg, var(--text-dark) 20%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            /* Soft shadow for legibility */
+        }
+
+        /* --- MAIN LAYOUT GRID --- */
+        .main-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        /* === CRITICAL: LAYERED VISUAL ROOM STYLES === */
+        .room-container {
+            position: relative;
+            /* Establishes stacking context */
+            width: 100%;
+            aspect-ratio: 16/9;
+            /* Forces correct image proportions */
+            background: #1e293b;
+            /* Dark placeholder if images fail */
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Common styles for ALL image layers */
+        .room-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            /* Ensures clicks pass through to anything below */
+            transition: opacity 0.5s ease-in-out;
+            /* Smooth fade transition */
+        }
+
+        /* STACKING ORDER */
+        /* 1. Base Layer (Bottom) - Always visible */
+        .layer-base {
+            z-index: 1;
+            opacity: 1;
+        }
+
+        /* 2. Overlay Layers (Top) - HIDDEN BY DEFAULT */
+        .layer-overlay {
+            z-index: 2;
+            opacity: 0;
+            /* Crucial: Hides them initially */
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        /* 3. Active State - Shows the layer when class is added by JS */
+        .layer-overlay.active {
+            opacity: 1;
+        }
+
+
+        /* === CONTROLS SIDEBAR STYLES === */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Generic Panel Style */
+        .panel {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .panel-header {
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .panel-header i {
+            color: var(--primary);
+        }
+
+        /* -- Wall Touch Panel Grid -- */
+        .wall-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .wall-btn {
+            aspect-ratio: 1;
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-light);
+        }
+
+        .wall-btn i {
+            font-size: 1.4rem;
+        }
+
+        .wall-btn span {
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Wall Button Active State */
+        .wall-btn.active {
+            background: var(--primary);
+            border-color: var(--primary-dark);
+            color: #fff;
+            box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* -- App UI Panel -- */
+        .app-ui {
+            background: #1e293b;
+            color: #fff;
+            border: none;
+        }
+
+        .app-ui .panel-header {
+            color: #fff;
+            opacity: 0.9;
+            justify-content: space-between;
+        }
+
+        .app-status {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .app-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .app-item span {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* App Toggle Switch Graphic */
+        .toggle {
+            width: 36px;
+            height: 20px;
+            background: #475569;
+            border-radius: 20px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* App Item Active State */
+        .app-item.active {
+            background: rgba(5, 150, 105, 0.15);
+            border-color: var(--primary);
+        }
+
+        .app-item.active .toggle {
+            background: var(--primary);
+        }
+
+        .app-item.active .toggle::after {
+            transform: translateX(16px);
+        }
+
+        /* NAV BACK BUTTON - Updated for Header Scope */
+        .nav-back {
+            position: absolute;
+            left: 2rem;
+            /* Vertically centered in header */
+            top: 50%;
+            transform: translateY(-50%);
+
+            color: var(--text-dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 16px;
+            border-radius: 50px;
+        }
+
+        .nav-back:hover {
+            color: var(--primary);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-50%) translateX(-2px);
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 1024px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+                max-width: 800px;
+            }
+        }
+
+        /* Mobile specific adjustments to fix overlap */
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+                /* Remove body padding on mobile for full width header */
+                background: #f8fafc;
+                padding-bottom: 2rem;
+            }
+
+            .glass-header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.5rem 1rem;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .nav-back {
+                position: static;
+                /* No longer absolute */
+                transform: none;
+                align-self: flex-start;
+                /* Align to left */
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .nav-back:hover {
+                transform: translateX(-2px);
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .main-wrapper {
+                padding: 0 1rem;
+                /* Add padding back to content */
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="glass-header">
+        <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        <h1>Experience Center</h1>
+    </header>
+
+    <div class="main-wrapper">
+
+        <div class="room-container">
+            <img src="assets/images/room-base.png" class="room-layer layer-base" alt="Room Base Off">
+
+            <img src="assets/images/layer-ceiling.png" id="vis-ceiling" class="room-layer layer-overlay"
+                alt="Ceiling Light">
+            <img src="assets/images/layer-fan.png" id="vis-fan" class="room-layer layer-overlay" alt="Fan Spinning">
+            <img src="assets/images/layer-light1.png" id="vis-light1" class="room-layer layer-overlay" alt="Left Light">
+            <img src="assets/images/layer-light2.png" id="vis-light2" class="room-layer layer-overlay"
+                alt="Right Light">
+            <img src="assets/images/layer-ac.png" id="vis-ac" class="room-layer layer-overlay" alt="AC Mist">
+            <img src="assets/images/layer-tv.png" id="vis-tv" class="room-layer layer-overlay" alt="TV Glow">
+            <img src="assets/images/layer-lamp.png" id="vis-lamp" class="room-layer layer-overlay" alt="Floor Lamp">
+            <img src="assets/images/layer-purifier.png" id="vis-purifier" class="room-layer layer-overlay"
+                alt="Purifier Light">
+
+
+
+        </div>
+
+
+        <div class="sidebar">
+
+            <div class="panel">
+                <div class="panel-header"><i class="fas fa-fingerprint"></i> Smart Wall Panel</div>
+                <div class="wall-grid">
+                    <div class="wall-btn" onclick="toggle('light1')" id="wall-light1"><i
+                            class="far fa-lightbulb"></i><span>Left</span></div>
+                    <div class="wall-btn" onclick="toggle('light2')" id="wall-light2"><i
+                            class="far fa-lightbulb"></i><span>Right</span></div>
+                    <div class="wall-btn" onclick="toggle('fan')" id="wall-fan"><i
+                            class="fas fa-fan"></i><span>Fan</span></div>
+                    <div class="wall-btn" onclick="toggle('ceiling')" id="wall-ceiling"><i
+                            class="fas fa-border-all"></i><span>Ceiling</span></div>
+                    <div class="wall-btn" onclick="toggle('lamp')" id="wall-lamp"><i
+                            class="fas fa-couch"></i><span>Lamp</span></div>
+                    <div class="wall-btn" onclick="toggle('tv')" id="wall-tv"><i class="fas fa-tv"></i><span>TV</span>
+                    </div>
+                    <div class="wall-btn" onclick="toggle('ac')" id="wall-ac"><i
+                            class="fas fa-snowflake"></i><span>AC</span></div>
+                    <div class="wall-btn" onclick="toggle('purifier')" id="wall-purifier"><i
+                            class="fas fa-wind"></i><span>Purifier</span></div>
+                </div>
+            </div>
+
+            <div class="panel app-ui">
+                <div class="panel-header">
+                    <span><i class="fas fa-mobile-alt"></i> Gthink App</span>
+                    <span class="app-status"><i class="fas fa-wifi"></i> Online</span>
+                </div>
+                <div class="app-list">
+                    <div class="app-item" onclick="toggle('light1')" id="app-light1"><span>Left Sconce</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('light2')" id="app-light2"><span>Right Sconce</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('fan')" id="app-fan"><span>Smart Fan</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('ceiling')" id="app-ceiling"><span>Profile Light</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('lamp')" id="app-lamp"><span>Floor Lamp</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('tv')" id="app-tv"><span>Smart TV</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('ac')" id="app-ac"><span>AC Unit</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="app-item" onclick="toggle('purifier')" id="app-purifier"><span>Air Purifier</span>
+                        <div class="toggle"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURATION ===
+        // This object maps the logical device names to the specific HTML IDs for their visual layer and buttons.
+        const devices = {
+            light1: { active: false, layer: 'vis-light1', wall: 'wall-light1', app: 'app-light1' },
+            light2: { active: false, layer: 'vis-light2', wall: 'wall-light2', app: 'app-light2' },
+            fan: { active: false, layer: 'vis-fan', wall: 'wall-fan', app: 'app-fan' },
+            ceiling: { active: false, layer: 'vis-ceiling', wall: 'wall-ceiling', app: 'app-ceiling' },
+            lamp: { active: false, layer: 'vis-lamp', wall: 'wall-lamp', app: 'app-lamp' },
+            tv: { active: false, layer: 'vis-tv', wall: 'wall-tv', app: 'app-tv' },
+            ac: { active: false, layer: 'vis-ac', wall: 'wall-ac', app: 'app-ac' },
+            purifier: { active: false, layer: 'vis-purifier', wall: 'wall-purifier', app: 'app-purifier' }
+        };
+
+        // === MAIN TOGGLE FUNCTION ===
+        function toggle(deviceId) {
+            // 1. Get device config and flip its state
+            const dev = devices[deviceId];
+            dev.active = !dev.active;
+
+            // 2. Update Visual Room Layer
+            // Finds the image by ID and toggles the 'active' class (which sets opacity: 1)
+            const layerElement = document.getElementById(dev.layer);
+            if (layerElement) {
+                layerElement.classList.toggle('active', dev.active);
+            } else {
+                console.error("Layer image not found:", dev.layer);
+            }
+
+            // 3. Sync Wall Panel Button
+            const wallBtn = document.getElementById(dev.wall);
+            if (wallBtn) wallBtn.classList.toggle('active', dev.active);
+
+            // 4. Sync App Panel Button
+            const appBtn = document.getElementById(dev.app);
+            if (appBtn) appBtn.classList.toggle('active', dev.active);
+        }
+    </script>
+
+</body>
+
+</html>
